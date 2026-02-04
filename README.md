@@ -1,2 +1,7 @@
 # Extracting-historical-wallet-reserves-for-audit
 Extracting historical wallet reserves for ethereum mainnet, solana mainnet and bitcoin
+"For the audit cutoff (e.g., 31-Dec-2025 23:59:59 UTC), historical holdings were determined by taking an “as-of” on-chain snapshot per chain and valuing it in USD using the latest available price point within the same day: 
+on Ethereum, Etherscan was used to map the cutoff timestamp to the closest prior block and balances were queried at that block for ETH (eth_getBalance) and ERC-20 tokens (eth_call balanceOf); on Solana, the cutoff 
+state was approximated by finding the last transaction at or before the cutoff (getSignaturesForAddress) and reading SOL postBalances, and for SPL tokens token accounts were identified (getTokenAccountsByOwner and/or mint filter) and balances were derived from postTokenBalances/preTokenBalances in the last pre-cutoff transaction affecting each token account; on Bitcoin, an indexed explorer (Esplora) was used to retrieve confirmed
+ transactions up to the cutoff and the balance was reconstructed by building the UTXO set (adding received outputs and removing spent prevouts). For USD valuation across all three chains, Alchemy historical prices were used and the latest price point within the day (closest to 23:59:59Z) was selected, then quantities were multiplied by the corresponding USD rates (using stablecoin parity and 1:1 wrapper conventions where applicable)."
+
