@@ -1,0 +1,232 @@
+# 🔨 DEVELOPER BUILD GUIDE
+## How to Create & Distribute CryptoAnalyzer.exe
+
+---
+
+## 📦 WHAT YOU'LL CREATE
+
+A **single .exe file** that accountants can use WITHOUT Python.
+
+No dependencies, no installation, no command line needed.
+
+---
+
+## 🛠️ BUILD PROCESS (Do This Once)
+
+### Step 1: Prepare Your Folder
+
+Create a folder structure:
+
+```
+CryptoAnalyzer_Build/
+├── app_main.py                  ← Main GUI application
+├── solana_alchemy.py            ← Your Solana script (unchanged)
+├── eth_alchemy.py               ← Your Ethereum script (unchanged)
+├── BUILD.bat                     ← Build script
+├── app_icon.ico                 ← (Optional) Icon for .exe
+└── README_FOR_ACCOUNTANTS.txt   ← Guide for users
+```
+
+**ALL FILES MUST BE IN THE SAME FOLDER**
+
+### Step 2: Install Python (if not already)
+
+1. Download from https://www.python.org/downloads/
+2. Run installer
+3. **CHECK**: "Add Python to PATH"
+4. Install
+
+### Step 3: Run the Build Script
+
+1. Open Command Prompt
+2. Navigate to your folder:
+   ```
+   cd C:\Users\YourName\Desktop\CryptoAnalyzer_Build
+   ```
+3. Run:
+   ```
+   BUILD.bat
+   ```
+
+Wait ~2 minutes. You'll see:
+
+```
+[1/3] Installing build tools...
+[2/3] Building executable...
+[3/3] Verifying build...
+SUCCESS! ✓
+```
+
+### Step 4: Find Your .exe
+
+```
+CryptoAnalyzer_Build/dist/CryptoAnalyzer.exe
+```
+
+This is your executable!
+
+---
+
+## 📤 DISTRIBUTE TO ACCOUNTANTS
+
+### Create Distribution Package
+
+```
+CryptoAnalyzer/
+├── CryptoAnalyzer.exe           ← The executable
+├── README_FOR_ACCOUNTANTS.txt   ← Usage guide
+└── SAMPLE_DATA/
+    ├── sample_balance_jan.xlsx  ← Example Excel file (optional)
+    └── (your sample data)
+```
+
+### Distribute as ZIP
+
+1. Select the `CryptoAnalyzer` folder
+2. Right-click → Send to → Compressed folder
+3. Creates `CryptoAnalyzer.zip`
+4. Send to accountants
+
+---
+
+## ✅ TEST THE .EXE FIRST
+
+Before sending to accountants:
+
+1. **Run on your computer:**
+   ```
+   dist/CryptoAnalyzer.exe
+   ```
+   - GUI appears? ✓
+   - Can set API keys? ✓
+   - Can select folder? ✓
+   - Can run analysis? ✓
+
+2. **Test on another computer** (if possible):
+   - No Python installed
+   - Still works? ✓
+
+3. **Check file size:**
+   - ~150-250 MB is normal
+   - Too small (<50 MB) = something missing
+   - Too large (>500 MB) = something extra included
+
+---
+
+## 🔐 API KEYS SECURITY
+
+### For You (Developer):
+- **DON'T** hardcode API keys in the script
+- App stores them in: `C:\Users\[username]\.crypto_analyzer_config.json`
+- Keys encrypted locally on user's computer
+
+### For Accountants:
+- They enter keys ONCE on first run
+- Keys saved locally (only on their computer)
+- No keys transmitted anywhere
+
+---
+
+## 🐛 IF BUILD FAILS
+
+### Error: "Python not found"
+```bash
+# Reinstall Python
+# Make sure "Add to PATH" is checked
+```
+
+### Error: "Module not found"
+```bash
+# Make sure all .py files are in same folder
+# Check filenames match exactly
+```
+
+### Error: "PyInstaller failed"
+```bash
+# Delete these folders:
+rm -r build dist *.spec
+
+# Try again:
+BUILD.bat
+```
+
+### ImportError: solana_alchemy/eth_alchemy
+- Check solana_alchemy.py and eth_alchemy.py are in same folder
+- Check function names match what app_main.py imports
+
+---
+
+## 📋 WHAT'S HAPPENING BEHIND THE SCENES
+
+When you run `BUILD.bat`:
+
+1. **pip install** - Downloads pandas, openpyxl, requests
+2. **PyInstaller** - Converts Python to .exe
+3. **Bundles**:
+   - Python runtime
+   - All packages
+   - Your scripts (solana_alchemy.py, eth_alchemy.py)
+   - app_main.py GUI
+4. **Creates** - Single `CryptoAnalyzer.exe` file
+
+Result: ~200 MB file that works on any Windows without Python.
+
+---
+
+## 🔄 UPDATING THE .EXE
+
+If you change the code later:
+
+1. Update `app_main.py` or your scripts
+2. Run `BUILD.bat` again
+3. Creates new `dist/CryptoAnalyzer.exe`
+4. Redistribute
+
+---
+
+## 📊 TYPICAL FLOW
+
+```
+YOU (Developer)                    ACCOUNTANTS (Users)
+───────────────                    ───────────────
+1. Prepare files
+2. Run BUILD.bat          ──────→  1. Extract ZIP
+3. Test CryptoAnalyzer.exe        2. Double-click .exe
+4. Zip & send            ──────→  3. Set API keys (once)
+                                   4. Run analysis
+                                   5. Get CSV report
+```
+
+**Accountants never touch code or Python!**
+
+---
+
+## ✨ THAT'S IT!
+
+You've successfully packaged a Python application into a standalone executable.
+
+Accountants can use it just like any Windows program. 🎉
+
+---
+
+## 🔗 USEFUL LINKS
+
+- **PyInstaller Docs**: https://pyinstaller.org/
+- **Alchemy API**: https://dashboard.alchemy.com
+- **Etherscan API**: https://etherscan.io/apis
+
+---
+
+## 💾 FILE CHECKLIST
+
+Before distributing, verify you have:
+
+```
+CryptoAnalyzer/
+├── CryptoAnalyzer.exe           ☐ Exists
+├── README_FOR_ACCOUNTANTS.txt   ☐ Exists
+├── SAMPLE_DATA/ (optional)      ☐ Sample Excel files
+└── SIZE: ~150-250 MB total      ☐ Check size
+```
+
+✓ Ready to send to accountants!

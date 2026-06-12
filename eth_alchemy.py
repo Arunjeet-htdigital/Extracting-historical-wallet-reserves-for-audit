@@ -83,13 +83,15 @@ def erc20_balance_at_block(holder: str, token_contract: str, block_number: int) 
 # =========================
 # PRICES (Alchemy Prices API)
 # =========================
-def historical_price_usd(symbol: str, start_iso: str, end_iso: str) -> dict:
+def historical_price_usd(symbol: str, start_iso: str, end_iso: str, interval="5m") -> dict:
     """
     Alchemy Prices API historical endpoint.
     """
     url = f"https://api.g.alchemy.com/prices/v1/{ALCHEMY_KEY}/tokens/historical"
-    payload = {"symbol": symbol, "startTime": start_iso, "endTime": end_iso}
+    payload = {"symbol": symbol, "startTime": start_iso, "endTime": end_iso, "interval": interval}
     r = requests.post(url, json=payload, timeout=30)
+    if r.status_code == 400:
+        print("[400 body]", r.text) 
     r.raise_for_status()
     return r.json()
 
@@ -117,7 +119,7 @@ def fx_rate_usd_end_of_day(symbol: str, ondate: str) -> float:
     Picks the latest available price point in the day [00:00:00Z, 23:59:59Z].
     Falls back to 1.0 for stablecoins if none found.
     """
-    start = f"{ondate}T00:00:00Z"
+    start = f"{ondate}T22:00:00Z"
     end = f"{ondate}T23:59:59Z"
 
     try:
@@ -215,26 +217,7 @@ def eth_snapshot_with_usd(wallet: str, ondate: str) -> pd.DataFrame:
 
     data["total_usd_value"].append(total_usd_value)
 
-    return data
-
-
-if __name__ == "__main__":
-
-
-    addresses=["MY WALLETS"
-    ]
-
-    dates="2025-12-31"
-
-    data_f = defaultdict(list)
-
-    for addr in addresses:
-        row = eth_snapshot_with_usd(addr, dates)
-        for i in row.keys():
-            data_f[i].append(row[i][0])
-    
-    df=pd.DataFrame(data_f)
-    df.to_csv(r"ether_chain_value_corprime", index=False)
+    return eth_amt, eth_usd_rate, eth_usd_value, usdc_usd_value, usdt_usd_value, weth_usd_value
 
 
 

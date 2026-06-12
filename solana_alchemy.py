@@ -25,6 +25,7 @@ STABLES = {"USDC", "USDT", "USX"}  # treat as $1 if price API doesn't return
 
 # CoinGecko IDs for fallback pricing (if Alchemy doesn't support the symbol)
 COINGECKO_IDS = {
+    "SOL" : "solana",
     "JITOSOL": "jito-staked-sol",
     # You can add more here later if needed
 }
@@ -178,12 +179,12 @@ def spl_balance_at_ts_via_last_tx(token_account: str, mint: str, ts_unix: int) -
 # =========================
 # PRICES
 # =========================
-def historical_price_usd(symbol: str, start_iso: str, end_iso: str) -> dict:
+def historical_price_usd(symbol: str, start_iso: str, end_iso: str, interval="5m") -> dict:
     """
     Alchemy Prices API - historical prices for a token symbol.
     """
     url = f"https://api.g.alchemy.com/prices/v1/{ALCHEMY_KEY}/tokens/historical"
-    payload = {"symbol": symbol, "startTime": start_iso, "endTime": end_iso}
+    payload = {"symbol": symbol, "startTime": start_iso, "endTime": end_iso, "interval": interval}
     r = requests.post(url, json=payload, timeout=30)
     r.raise_for_status()
     return r.json()
@@ -214,10 +215,10 @@ def price_on_date_usd(symbol: str, ondate: str) -> Optional[float]:
     """
     # 1) Alchemy
     try:
-        prices = historical_price_usd(symbol, f"{ondate}T00:00:00Z", f"{ondate}T23:59:59Z")
+        prices = historical_price_usd(symbol, f"{ondate}T23:54:55Z", f"{ondate}T23:59:59Z")
         data = prices.get("data", [])
         if data:
-            return float(data[0]["value"])
+            return float(data[-1]["value"])
     except Exception:
         pass
 
@@ -340,35 +341,3 @@ def solana_wallet_value_on_date(wallet: str, ondate: str, debug: bool = True) ->
     jito_usd = token_usd_value(JITOSOL_MINT, "JITOSOL", "JITOSOL")
 
     return sol_amount, sol_price, sol_usd_value, usdc_usd, usdt_usd, usx_usd, jito_usd
-
-
-# =========================
-# RUN
-# =========================
-if __name__ == "__main__":
-
-    wallets = ["Wallets here"
-    ]
-
-    ondate = "2025-12-31"
-    for wallet in wallets:
-        (
-            sol,
-            sol_usd_price,
-            sol_usd_value,
-            usdc_usd_value,
-            usdt_usd_value,
-            usx_usd_value,
-            jitosol_usd_value,
-        ) = solana_wallet_value_on_date(wallet, ondate, debug=True)
-
-        print("\n=== SUMMARY ===")
-        print(f"wallet: {wallet}")
-        print("SOL:", sol)
-        print("SOL USD price:", sol_usd_price)
-        print("SOL USD value:", sol_usd_value)
-        print("USDC USD value:", usdc_usd_value)
-        print("USDT USD value:", usdt_usd_value)
-        print("USX  USD value:", usx_usd_value)
-        print("JITOSOL USD value:", jitosol_usd_value)
-        print("#----------------------------------------------------------------------------------------------#")
