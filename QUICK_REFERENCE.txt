@@ -1,0 +1,109 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║           CRYPTO ANALYZER - QUICK REFERENCE CARD                       ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+┌─ FOR DEVELOPERS ─────────────────────────────────────────────────────┐
+│                                                                        │
+│  STEP 1: Prepare Folder                                              │
+│  ✓ app_main.py              ← Main application                       │
+│  ✓ solana_alchemy.py        ← Your Solana script (unchanged)        │
+│  ✓ eth_alchemy.py           ← Your Ethereum script (unchanged)      │
+│  ✓ BUILD.bat                ← Build script                           │
+│                                                                        │
+│  STEP 2: Run Build (One Time)                                        │
+│  > CD to folder                                                       │
+│  > python BUILD.bat                                                   │
+│  > Wait ~2 minutes                                                    │
+│                                                                        │
+│  STEP 3: Distribute                                                  │
+│  ✓ Find: dist/CryptoAnalyzer.exe                                     │
+│  ✓ Create folder with .exe + README                                  │
+│  ✓ Zip and send to accountants                                       │
+│                                                                        │
+│  DONE! Accountants just double-click the .exe                        │
+│                                                                        │
+└─ FOR ACCOUNTANTS ───────────────────────────────────────────────────┘
+│                                                                        │
+│  STEP 1: Extract & Run                                               │
+│  ✓ Extract CryptoAnalyzer.zip                                        │
+│  ✓ Double-click CryptoAnalyzer.exe                                   │
+│                                                                        │
+│  STEP 2: Configure (First Time Only)                                 │
+│  ✓ Click "⚙️ Set API Keys"                                           │
+│  ✓ Get Alchemy Key from dashboard.alchemy.com (free)                │
+│  ✓ Get Etherscan Key from etherscan.io/apis (free)                  │
+│  ✓ Click "💾 Save Keys"                                              │
+│                                                                        │
+│  STEP 3: Analyze Wallets                                             │
+│  ✓ Put Excel files in folder                                         │
+│  ✓ Click "📂 Browse"                                                 │
+│  ✓ Enter date (YYYY-MM-DD)                                           │
+│  ✓ Click "🚀 Run Analysis"                                           │
+│  ✓ Get results in CSV file                                           │
+│                                                                        │
+│  Excel Required Columns:                                              │
+│  • ticker    (SOL, ETH, BTC)                                         │
+│  • wallet    (wallet address)                                         │
+│  • balance_date  (any date format)                                   │
+│                                                                        │
+└────────────────────────────────────────────────────────────────────┘
+
+📊 SUPPORTED CRYPTOCURRENCIES
+  ✅ SOL     - Solana
+  ✅ ETH     - Ethereum
+  ⏳ BTC     - Bitcoin (coming soon)
+
+⚡ KEY FEATURES
+  ✓ Single .exe file (no Python needed)
+  ✓ GUI interface (no command line)
+  ✓ Settings saved locally
+  ✓ Batch processing
+  ✓ Historical price data
+  ✓ USD valuations
+
+📁 FILE STRUCTURE
+
+BEFORE BUILD (Developer):
+  CryptoAnalyzer_Build/
+  ├── app_main.py
+  ├── solana_alchemy.py
+  ├── eth_alchemy.py
+  ├── BUILD.bat
+  └── README_FOR_ACCOUNTANTS.txt
+
+AFTER BUILD (For Distribution):
+  CryptoAnalyzer/
+  ├── CryptoAnalyzer.exe          (~180 MB)
+  ├── README_FOR_ACCOUNTANTS.txt
+  └── SAMPLE_DATA/ (optional)
+
+🔑 API KEYS
+  Alchemy:   https://dashboard.alchemy.com (free)
+  Etherscan: https://etherscan.io/apis (free)
+  Both provide free tier with 100K+ requests/month
+
+🐛 COMMON ISSUES
+
+  "API Keys Not Configured"
+  → Click ⚙️ Set API Keys, enter them
+
+  "No XLSX files found"
+  → Check files are .xlsx (not .xls)
+  → Check they're in selected folder
+
+  "Invalid date"
+  → Use format YYYY-MM-DD (e.g., 2024-12-05)
+
+  "Takes a long time"
+  → Normal! 5-30 sec per wallet is expected
+
+📞 SUPPORT
+  Developer: [Your name/email]
+  Accountants: See README_FOR_ACCOUNTANTS.txt
+
+✨ WORKFLOW SUMMARY
+
+Developer: BUILD.bat (one time) → .exe file → Share
+Accountant: Extract → Double-click → Set keys (once) → Use
+
+════════════════════════════════════════════════════════════════════════
