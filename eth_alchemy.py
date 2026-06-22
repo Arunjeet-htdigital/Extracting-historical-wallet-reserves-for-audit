@@ -11,6 +11,7 @@ ALCHEMY_KEY = os.environ["ALCHEMY_KEY"]
 ALCHEMY_RPC = f"https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}"
 
 ETHERSCAN_KEY = os.environ.get("ETHERSCAN_KEY")
+#Add mint tokens here... Ensure to handle them in app_main to...
 
 TOKENS = {
     "USDC": {"address": "0xA0b86991c6218b36c1d19d4a2e9eb0ce3606eb48", "decimals": 6},
@@ -25,16 +26,69 @@ STABLE_FALLBACK = {"USDC": 1.0, "USDT": 1.0}
 # EVM RPC HELPERS
 # =========================
 def rpc(method, params):
-    r = requests.post(
-        ALCHEMY_RPC,
-        json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
-        timeout=30,
-    )
-    r.raise_for_status()
-    j = r.json()
-    if "error" in j:
-        raise RuntimeError(j["error"])
-    return j["result"]
+    """
+    RPC call with adaptive backoff on 429.
+    t0 = 5ms, increases by 5ms each retry, max 2 minutes total.
+    """
+    t0 = 0.005  # 5ms in seconds
+    t = 0  # accumulated wait time
+    max_wait = 120  # 2 minutes
+    start_time = time.time()
+    retry_count = 0
+    
+    while (time.time() - start_time) < max_wait:
+        try:
+            r = requests.post(
+                ALCHEMY_RPC,
+                json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
+                timeout=30,
+            )
+            r.raise_for_status()
+            j = r.json()
+            
+            # 429 check
+            if "error" in j and j["error"].get("code") == 429:
+                wait_time = t + t0
+                elapsed = time.time() - start_time
+                print(f" 429 Rate limited ({method}). Waiting {wait_time*1000:.0f}ms... (elapsed: {elapsed:.1f}s)")
+                time.sleep(wait_time)
+                t += t0
+                retry_count += 1
+                continue
+            
+            if "error" in j:
+                raise RuntimeError(j["error"])
+            
+            if retry_count > 0:
+                print(f"{method} succeeded after {retry_count} retries")
+            
+            return j["result"]
+        
+        except requests.exceptions.HTTPError as e:
+            if e.response.status_code == 429:
+                wait_time = t + t0
+                elapsed = time.time() - start_time
+                print(f" 429 Rate limited (HTTP {method}). Waiting {wait_time*1000:.0f}ms... (elapsed: {elapsed:.1f}s)")
+                time.sleep(wait_time)
+                t += t0
+                retry_count += 1
+                continue
+            else:
+                raise
+        
+        except requests.exceptions.Timeout:
+            wait_time = t + t0
+            print(f" Timeout ({method}). Waiting {wait_time*1000:.0f}ms and retrying...")
+            time.sleep(wait_time)
+            t += t0
+            retry_count += 1
+            continue
+        
+        except Exception as e:
+            raise
+    
+    raise RuntimeError(f"Failed after {retry_count} retries over 2 minutes ({method})")
+
 
 
 def get_block_by_time_etherscan(ts_unix: int) -> int:
