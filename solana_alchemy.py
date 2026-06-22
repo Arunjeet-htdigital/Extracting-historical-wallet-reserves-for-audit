@@ -13,6 +13,8 @@ ALCHEMY_RPC = f"https://solana-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}"
 TOKEN_PROGRAM_ID = "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"        # classic SPL
 TOKEN_2022_PROGRAM_ID = "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"    # token-2022
 
+# Add mint addresses here... Ensure to handle them in app_main.py
+
 # Mints (mainnet)
 USDC_MINT = "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
 USDT_MINT = "Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB"
@@ -34,17 +36,72 @@ COINGECKO_IDS = {
 # =========================
 # RPC HELPERS
 # =========================
+
 def rpc(method: str, params):
-    r = requests.post(
-        ALCHEMY_RPC,
-        json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
-        timeout=30,
-    )
-    r.raise_for_status()
-    data = r.json()
-    if "error" in data:
-        raise RuntimeError(data["error"])
-    return data["result"]
+    """
+    RPC call with adaptive backoff on 429.
+    t0 = 5ms, increases by 5ms each retry, max 2 minutes total.
+    """
+    t0 = 0.005  # 5ms in seconds
+    t = 0  # accumulated wait time
+    max_wait = 120  # 2 minutes
+    start_time = time.time()
+    retry_count = 0
+    
+    while (time.time() - start_time) < max_wait:
+        try:
+            r = requests.post(
+                ALCHEMY_RPC,
+                json={"jsonrpc": "2.0", "id": 1, "method": method, "params": params},
+                timeout=30,
+            )
+            r.raise_for_status()
+            data = r.json()
+            
+            # 429 - Rate limited, retry with backoff
+            if "error" in data and data["error"].get("code") == 429:
+                wait_time = t + t0
+                elapsed = time.time() - start_time
+                print(f" 429 Rate limited ({method}). Waiting {wait_time*1000:.0f}ms... (elapsed: {elapsed:.1f}s)")
+                time.sleep(wait_time)
+                t += t0
+                retry_count += 1
+                continue
+            
+            # Success or other error
+            if "error" in data:
+                raise RuntimeError(data["error"])
+            
+            if retry_count > 0:
+                print(f"  ✓ {method} succeeded after {retry_count} retries")
+            
+            return data["result"]
+        
+        except requests.exceptions.HTTPError as e:
+            # Check HTTP status
+            if e.response.status_code == 429:
+                wait_time = t + t0
+                elapsed = time.time() - start_time
+                print(f" 429 Rate limited (HTTP {method}). Waiting {wait_time*1000:.0f}ms... (elapsed: {elapsed:.1f}s)")
+                time.sleep(wait_time)
+                t += t0
+                retry_count += 1
+                continue
+            else:
+                raise
+        
+        except requests.exceptions.Timeout:
+            wait_time = t + t0
+            print(f" Timeout ({method}). Waiting {wait_time*1000:.0f}ms and retrying...")
+            time.sleep(wait_time)
+            t += t0
+            retry_count += 1
+            continue
+        
+        except Exception as e:
+            raise
+    
+    raise RuntimeError(f"Failed after {retry_count} retries over 2 minutes ({method})")
 
 
 def find_last_signature_before_ts(address: str, ts_unix: int, page_limit: int = 1000) -> Optional[str]:
