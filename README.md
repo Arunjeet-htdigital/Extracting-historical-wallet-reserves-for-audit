@@ -1,4 +1,7 @@
 # Extracting-historical-wallet-reserves-for-audit
+<img width="4491" height="4068" alt="Drawing" src="https://github.com/user-attachments/assets/670f4571-ba53-4065-8fa1-037d8d62b9f2" />
+
+One essential thing. Please delete the API keys once installed. The app will automatically save it at the backend...
 Extracting historical wallet reserves for ethereum mainnet, solana mainnet and bitcoin
 "For the audit cutoff (e.g., 31-Dec-2025 23:59:59 UTC), historical holdings were determined by taking an “as-of” on-chain snapshot per chain and valuing it in USD using the latest available price point within the same day: 
 on Ethereum, Etherscan was used to map the cutoff timestamp to the closest prior block and balances were queried at that block for ETH (eth_getBalance) and ERC-20 tokens (eth_call balanceOf); on Solana, the cutoff 
